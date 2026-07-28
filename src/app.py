@@ -282,7 +282,7 @@ st.markdown(
             min-height: 52vh;
             flex: 1;
             margin: 0 auto;
-            padding: 2rem 0 7.5rem;
+            padding: 2rem 0 150px;
         }
 
         .ves-user-message {
@@ -345,19 +345,111 @@ st.markdown(
             white-space: pre-wrap;
         }
 
+        .ves-thinking-message {
+            display: flex;
+            width: 100%;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 0.7rem;
+            margin: 0 0 16px;
+        }
+
+        .ves-thinking-bubble {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.72rem 0.95rem;
+            border: 1px solid #D8E6FF;
+            border-radius: 20px 20px 20px 7px;
+            background: #FFFFFF;
+            color: var(--ves-muted);
+            box-shadow: 0 8px 28px rgba(37, 99, 235, 0.055);
+            font-size: 0.88rem;
+            font-weight: 560;
+        }
+
+        .ves-thinking-spinner {
+            width: 17px;
+            height: 17px;
+            flex: 0 0 17px;
+            border: 2px solid #D8E6FF;
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: ves-spin 0.75s linear infinite;
+        }
+
+        @keyframes ves-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .st-key-chat_composer {
-            position: sticky;
-            z-index: 20;
+            position: fixed !important;
+            z-index: 1000;
+            right: unset;
             bottom: 16px;
-            width: min(100%, 920px);
-            margin: auto auto 1rem;
+            left: 50%;
+            width: min(920px, calc(100vw - 32px));
+            max-width: 920px;
+            margin: 0;
             padding: 0.625rem;
             border: 0;
             border-radius: 22px;
-            background: rgba(245, 249, 255, 0.92);
-            box-shadow: none;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(245, 249, 255, 0.94);
+            box-shadow: 0 14px 38px rgba(37, 99, 235, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transform: translateX(-50%);
+        }
+
+        .st-key-chat_composer [data-testid="stHorizontalBlock"] {
+            display: grid !important;
+            width: 100% !important;
+            grid-template-columns: minmax(0, 1fr) 40px !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+
+        .st-key-chat_composer [data-testid="stColumn"] {
+            width: 100% !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .st-key-clear_chat_icon,
+        .st-key-clear_chat_icon [data-testid="stButton"] {
+            width: 40px !important;
+            height: 40px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .st-key-clear_chat_icon button {
+            display: grid !important;
+            width: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            height: 40px !important;
+            min-height: 40px !important;
+            max-height: 40px !important;
+            place-items: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 1px solid #D8E6FF !important;
+            border-radius: 12px !important;
+            background: #FFFFFF !important;
+            color: #2563EB !important;
+            box-shadow: none !important;
+            font-size: 1rem !important;
+        }
+
+        .st-key-clear_chat_icon button:hover {
+            border-color: #BFD4FF !important;
+            background: #EEF5FF !important;
+            color: #1D4ED8 !important;
         }
 
         [data-testid="stAlert"] {
@@ -407,6 +499,11 @@ st.markdown(
             .ves-assistant-bubble {
                 max-width: calc(100% - 54px);
             }
+
+            .st-key-chat_composer {
+                bottom: 10px;
+                width: calc(100vw - 20px);
+            }
         }
     </style>
     """,
@@ -429,6 +526,7 @@ def initialize_session() -> None:
 def clear_conversation() -> None:
     """Clear only the existing message list."""
     st.session_state.messages = []
+    st.session_state.pop("_pending_prompt", None)
     st.rerun()
 
 
@@ -489,7 +587,7 @@ def render_empty_composer(service: ChatService) -> str | None:
         return st.chat_input(
             "Nhập điểm thi, sở thích hoặc câu hỏi của bạn...",
             max_chars=service.max_message_length,
-            key="empty_chat_input",
+            key="hero_chat_input",
         )
 
 
@@ -517,22 +615,68 @@ def render_history() -> None:
                     """,
                     unsafe_allow_html=True,
                 )
+        if st.session_state.get("_pending_prompt"):
+            st.markdown(
+                """
+                <div
+                    class="ves-thinking-message"
+                    aria-label="VeS đang suy nghĩ"
+                    aria-live="polite"
+                >
+                    <div class="ves-assistant-avatar" aria-hidden="true">VeS</div>
+                    <div class="ves-thinking-bubble">
+                        <span class="ves-thinking-spinner" aria-hidden="true"></span>
+                        <span>VeS đang suy nghĩ...</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
 
 def render_chat_composer(service: ChatService) -> str | None:
-    """Render sticky, container-width input below the active thread."""
+    """Render fixed input and a same-size clear action below the active thread."""
     with st.container(key="chat_composer"):
-        return st.chat_input(
-            "Nhập điểm thi, sở thích hoặc câu hỏi của bạn...",
-            max_chars=service.max_message_length,
-            key="active_chat_input",
+        input_column, clear_column = st.columns(
+            [1, 0.06],
+            gap="small",
+            vertical_alignment="center",
         )
+        with input_column:
+            prompt = st.chat_input(
+                (
+                    "VeS đang trả lời..."
+                    if st.session_state.get("_pending_prompt")
+                    else "Nhập điểm thi, sở thích hoặc câu hỏi của bạn..."
+                ),
+                max_chars=service.max_message_length,
+                key="fixed_chat_input",
+                disabled=bool(st.session_state.get("_pending_prompt")),
+            )
+        with clear_column:
+            if st.button(
+                "🗑️",
+                key="clear_chat_icon",
+                help="Cuộc trò chuyện mới",
+            ):
+                clear_conversation()
+        return prompt
 
 
 def submit_message(service: ChatService, prompt: str) -> None:
-    """Call the unchanged backend and append to the existing message list."""
+    """Show the user message immediately, then schedule one model call."""
     st.session_state.messages.append({"role": "user", "content": prompt})
-    response = service.chat(prompt)
+    st.session_state["_pending_prompt"] = prompt
+    st.rerun()
+
+
+def process_pending_message(service: ChatService) -> None:
+    """Replace the visible thinking state with one model response."""
+    pending_prompt = st.session_state.get("_pending_prompt")
+    if not pending_prompt:
+        return
+
+    response = service.chat(str(pending_prompt))
     st.session_state.messages.append(
         {
             "role": "assistant",
@@ -541,6 +685,7 @@ def submit_message(service: ChatService, prompt: str) -> None:
             "is_error": response.is_error,
         }
     )
+    st.session_state.pop("_pending_prompt", None)
     st.rerun()
 
 
@@ -562,6 +707,8 @@ def run_app() -> None:
 
     if prompt:
         submit_message(service, prompt)
+
+    process_pending_message(service)
 
 
 if __name__ == "__main__":
