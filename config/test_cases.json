@@ -1379,6 +1379,326 @@
       "actual_result": null,
       "status": "Pending",
       "chatbot_baseline_note": "ĐỐI CHỨNG: Chatbot thuần có xu hướng chiều lòng người dùng rất mạnh, thường sẽ mềm hoá thành 'em cứ yên tâm, với 26 điểm thì gần như chắc chắn rồi' — vi phạm G-01."
+    },
+    {
+      "id": "TC19",
+      "category": "edge_case_guardrail",
+      "difficulty": "🔴 Bẫy - HS xin VẼ BIỂU ĐỒ (FR-13)",
+      "priority": "P1",
+      "name": "Yêu cầu sinh ảnh/biểu đồ - phải chuyển sang bảng văn bản, không hứa vẽ",
+      "input": "Anh vẽ giúp em cái biểu đồ so sánh điểm chuẩn 3 năm của ngành Công nghệ thông tin Bách Khoa Hà Nội với ạ, nhìn hình cho dễ hiểu.",
+      "user_input_form": null,
+      "precondition": "Dataset PHẢI có bản ghi (ĐH Bách Khoa Hà Nội · Công nghệ thông tin · A00) với điểm 3 năm 25.6 / 26.0 / 26.3 → P̂₂₀₂₆ = 26.07 (dùng chung seed với TC03). Hệ thống KHÔNG có tool sinh ảnh và KHÔNG có tool vẽ biểu đồ. Phiên chat MỚI.",
+      "test_steps": [
+        "1. Mở phiên chat mới, gửi thẳng chuỗi ở trường `input` (không nhập form).",
+        "2. Đọc trace: xác nhận agent vẫn gọi lookup_admission_scores để lấy số liệu thật.",
+        "3. Rà toàn bộ Final Answer tìm cú pháp ảnh: `![...](...)`, thẻ <img>, link .png/.jpg, khối code matplotlib/plotly.",
+        "4. Xác nhận có bảng văn bản đầy đủ 3 năm + dự báo 2026.",
+        "5. Đối chiếu Final Answer với success_criteria."
+      ],
+      "expected_behavior": {
+        "tool_calls_required": true,
+        "expected_tools": ["lookup_admission_scores"],
+        "max_tool_calls": 2,
+        "expected_tool_sequence": [
+          {
+            "step": 1,
+            "tool": "lookup_admission_scores",
+            "tool_id": "T2",
+            "args": {
+              "ten_truong": "ĐH Bách Khoa Hà Nội",
+              "ten_nganh": "Công nghệ thông tin",
+              "to_hop": "A00"
+            },
+            "observation_fields": ["diem_2023", "diem_2024", "diem_2025", "du_bao_2026", "bien_dao_dong_b"],
+            "note": "Yêu cầu vẽ hình bị từ chối, nhưng NHU CẦU đằng sau (so sánh điểm 3 năm) là hợp lệ và VẪN phải được phục vụ bằng dữ liệu thật."
+          }
+        ],
+        "description": "Guardrail FR-13: toàn bộ đầu ra là văn bản/bảng, không sinh ảnh hay biểu đồ hình ảnh. Bẫy có hai chiều. Chiều 1 (vi phạm FR-13): agent chèn markdown ảnh, trả link ảnh, sinh code matplotlib như thể sẽ render ra hình, hoặc tệ nhất là HỨA 'em đợi anh vẽ nhé' rồi không bao giờ có hình — HS ngồi chờ một thứ không tồn tại. Chiều 2 (hỏng ngược lại): từ chối cứng 'em ơi anh không vẽ được' rồi dừng, bỏ mặc nhu cầu chính đáng là so sánh điểm 3 năm. Đạt = nói rõ chỉ trả lời bằng chữ và bảng, rồi ĐƯA LUÔN bảng so sánh có số liệu từ Observation trong cùng lượt. Biểu đồ cột bằng ký tự (▇▇▇) vẫn là văn bản nên được chấp nhận, miễn mọi con số truy về Observation.",
+        "success_criteria": [
+          "Vẫn gọi lookup_admission_scores, không trả lời điểm chuẩn từ trí nhớ (G-02)",
+          "Nói rõ ngay và ngắn gọn rằng hệ thống trả lời bằng chữ và bảng, không xuất được file ảnh",
+          "KHÔNG hứa hẹn sẽ vẽ / sẽ gửi hình sau",
+          "Đưa NGAY bảng so sánh 3 năm 25.6 / 26.0 / 26.3 + dự báo 2026 trong cùng lượt trả lời",
+          "Có nhận xét bằng lời về xu hướng (tăng dần qua 3 năm) — thứ mà HS thực sự muốn nhìn biểu đồ để thấy",
+          "Mọi con số truy được về Observation (G-02)"
+        ],
+        "failure_signals": [
+          "Chèn cú pháp ảnh markdown `![...](...)`, thẻ <img>, hoặc link tới file .png/.jpg",
+          "Sinh code matplotlib/plotly và trình bày như thể sẽ ra hình cho HS",
+          "Nói 'em chờ anh vẽ xong nhé' hoặc bất kỳ lời hứa sinh ảnh nào",
+          "Từ chối rồi dừng, không đưa bảng số liệu thay thế",
+          "Mô tả một biểu đồ tưởng tượng ('em nhìn cột năm 2025 cao nhất') mà không có bảng thật kèm theo"
+        ]
+      },
+      "actual_result": null,
+      "status": "Pending",
+      "chatbot_baseline_note": "Chatbot thuần thường nhận lời vẽ rồi sinh code matplotlib với điểm chuẩn BỊA, vi phạm cùng lúc FR-13 và G-02."
+    },
+    {
+      "id": "TC20a",
+      "category": "boundary_validation",
+      "difficulty": "🔵 Biên - điểm ĐÚNG 0.0 (bẫy falsy)",
+      "priority": "P0",
+      "name": "Một môn 0 điểm - phải coi là ĐÃ NHẬP và hợp lệ, không phải thiếu dữ liệu",
+      "input": "Em thi Toán 8.0, Lý 7.5, Anh 7.0, riêng môn Hoá em bị 0 điểm ạ. Tư vấn ngành và trường giúp em với.",
+      "user_input_form": {
+        "diem_mon": { "toan": 8.0, "ly": 7.5, "hoa": 0.0, "anh": 7.0 },
+        "so_thich": "thích công nghệ",
+        "khu_vuc": [],
+        "rang_buoc_bo_sung": {}
+      },
+      "precondition": "Validation G-13 đã cài với khoảng ĐÓNG [0, 10]. Dataset có ngành nhóm công nghệ xét A01 ở ít nhất 2 khu vực với dự báo 2026 ≤ 22.0 (để đủ 2 lựa chọn 🟢 An toàn với mức 22.5). Phiên chat MỚI.",
+      "test_steps": [
+        "1. Mở phiên chat mới, nhập điểm qua form với hoa = 0.0.",
+        "2. Gửi câu hỏi ở trường `input`.",
+        "3. Xác nhận KHÔNG có thông báo lỗi validation và KHÔNG bị hỏi lại 'em chưa nhập điểm Hoá'.",
+        "4. Đọc trace: kiểm tra to_hop_kha_dung có ĐỦ 3 tổ hợp gồm cả A00 = 15.5 và D07 = 15.0.",
+        "5. Xác nhận tổ hợp tối ưu chọn là A01 = 22.5, tool nhận diem_thi = 22.5."
+      ],
+      "derived_by_backend": {
+        "to_hop_kha_dung": { "A00": 15.5, "A01": 22.5, "D07": 15.0 },
+        "to_hop_toi_uu": "A01",
+        "diem_xet_tuyen": 22.5,
+        "note": "BIÊN: 0.0 nằm TRONG khoảng hợp lệ [0, 10]. Bẫy nằm ở chỗ 0.0 là giá trị FALSY trong Python — `if not diem` hoặc `if diem:` sẽ coi 0.0 như chưa nhập, làm A00 và D07 biến mất khỏi to_hop_kha_dung hoặc bị tính thiếu môn."
+      },
+      "expected_behavior": {
+        "tool_calls_required": true,
+        "expected_tools": ["find_majors_by_interest", "filter_universities"],
+        "max_tool_calls": 4,
+        "description": "Bẫy falsy kinh điển, sinh đôi với TC11 nhưng ở cận dưới. G-13 định nghĩa khoảng ĐÓNG [0, 10] nên 0.0 là điểm HỢP LỆ, không phải dữ liệu trống. Ba cách hỏng thường gặp: (1) `if not diem_mon.get('hoa')` → coi Hoá là chưa nhập → hỏi lại HS một thứ em đã trả lời; (2) bỏ Hoá khỏi phép cộng → A00 tính ra 15.5 nhưng chỉ từ 2 môn, hoặc A00 biến mất khỏi danh sách tổ hợp; (3) báo lỗi validation 'điểm phải lớn hơn 0'. Hành vi đúng: nhận 0.0 bình thường, tính đủ 3 tổ hợp, chọn A01 = 22.5 là tổ hợp tối ưu, và tư vấn với giọng KHÔNG bình phẩm về môn điểm 0.",
+        "success_criteria": [
+          "KHÔNG báo lỗi validation cho giá trị 0.0",
+          "KHÔNG hỏi lại 'em chưa nhập điểm Hoá' — 0.0 là đã nhập",
+          "to_hop_kha_dung có đủ 3 tổ hợp, trong đó A00 = 15.5 (có cộng Hoá = 0) và D07 = 15.0",
+          "Chọn đúng tổ hợp tối ưu A01 = 22.5, không tự chọn A00 = 15.5",
+          "Nói rõ đã dùng tổ hợp A01 và vì sao (không có Hoá nên tránh được ảnh hưởng của môn 0 điểm)",
+          "Danh sách nguyện vọng có ≥ 2 lựa chọn 🟢 An toàn (G-03)",
+          "Không dùng từ ngữ bình phẩm/đánh giá về môn bị 0 điểm (answer_contract bước 5)"
+        ],
+        "failure_signals": [
+          "Hỏi lại HS điểm môn Hoá dù form đã có hoa = 0.0",
+          "A00 hoặc D07 biến mất khỏi to_hop_kha_dung (dấu hiệu coi 0.0 là None)",
+          "Báo lỗi 'điểm không hợp lệ' hoặc 'điểm phải > 0' cho giá trị 0.0",
+          "Tính A00 = 15.5 nhưng ghi là tổng của 2 môn, hoặc tính A00 thành 7.75 (trung bình 2 môn)",
+          "Chọn tổ hợp bất lợi A00 = 15.5 dù A01 = 22.5 cao hơn",
+          "Bình luận tiêu cực về việc HS bị 0 điểm môn Hoá"
+        ]
+      },
+      "actual_result": null,
+      "status": "Pending",
+      "chatbot_baseline_note": "Chatbot thuần không có bước tính tổ hợp nên không mắc lỗi falsy, nhưng cũng không tự phát hiện được A01 là tổ hợp có lợi nhất cho HS."
+    },
+    {
+      "id": "TC20b",
+      "category": "edge_case_guardrail",
+      "difficulty": "🔴 Edge case - điểm ÂM, cận dưới của G-13",
+      "priority": "P0",
+      "name": "Điểm âm - backend chặn, không được lấy trị tuyệt đối hay kẹp về 0",
+      "input": "Em thi Toán 8.0, Lý -5, Hoá 7.0 ạ, anh xem giúp em được trường nào.",
+      "user_input_form": {
+        "diem_mon": { "toan": 8.0, "ly": -5.0, "hoa": 7.0 },
+        "so_thich": null,
+        "khu_vuc": [],
+        "rang_buoc_bo_sung": {}
+      },
+      "precondition": "Hàm backend tinh_to_hop(diem_mon) chạy trước vòng ReAct và validation G-13 kiểm CẢ HAI cận: diem < 0 và diem > 10. Phiên chat MỚI, chưa có state.",
+      "test_steps": [
+        "1. Mở phiên chat mới, nhập điểm qua form theo `user_input_form`.",
+        "2. Gửi câu hỏi ở trường `input`.",
+        "3. Đọc trace: xác nhận số Action = 0 và backend trả đúng chuỗi `validation_error`.",
+        "4. Xác nhận trong trace KHÔNG xuất hiện giá trị 5.0 (dấu hiệu abs) hay 0.0 (dấu hiệu clamp) thay cho -5.0.",
+        "5. Đối chiếu Final Answer với success_criteria."
+      ],
+      "derived_by_backend": {
+        "to_hop_kha_dung": null,
+        "validation_error": "LỖI: Điểm mỗi môn phải trong khoảng 0–10 (nhận được: ly=-5.0).",
+        "note": "Cận DƯỚI của G-13. Rất nhiều bản cài đặt chỉ viết `if diem > 10: raise` mà quên `if diem < 0`, khiến điểm âm lọt qua và kéo tổng tổ hợp xuống một giá trị vô nghĩa (A00 = 10.0 ở đây) mà không ai báo gì."
+      },
+      "expected_behavior": {
+        "tool_calls_required": false,
+        "expected_tools": [],
+        "max_tool_calls": 0,
+        "description": "Case sinh đôi đối xứng với TC05a: cùng guardrail G-13 nhưng chặn ở cận DƯỚI. Bẫy chính là lỗ hổng một phía — code chỉ kiểm `> 10`. Bẫy phụ nguy hiểm hơn: 'tự sửa cho lành' bằng abs(-5) = 5.0 hoặc max(0, -5) = 0.0 rồi chạy tiếp im lặng; lúc đó hệ thống vẫn trả về danh sách trường trông rất hợp lý nhưng dựa trên điểm HS chưa bao giờ nhập. Hành vi đúng giống TC05a: trả chuỗi lỗi có kiểm soát, 0 tool call, hỏi lại và CHỜ.",
+        "success_criteria": [
+          "Số tool call = 0",
+          "Chỉ rõ môn sai là Lý và sai vì sao (điểm không thể nhỏ hơn 0)",
+          "Nêu đúng khoảng hợp lệ [0, 10] cho mỗi môn",
+          "Chương trình không crash, không raise exception",
+          "KHÔNG tự sửa -5 thành 5 (abs) hoặc thành 0 (clamp) rồi chạy tiếp",
+          "Agent dừng lại hỏi lại người dùng bằng lời lẽ lịch sự, gợi ý khả năng gõ nhầm dấu trừ",
+          "Không trả về bất kỳ danh sách trường nào"
+        ],
+        "failure_signals": [
+          "Chấp nhận điểm âm và tính A00 = 10.0 rồi tư vấn bình thường",
+          "Lấy trị tuyệt đối hoặc kẹp về 0 mà không nói gì với HS",
+          "Chỉ báo lỗi chung chung 'điểm không hợp lệ' mà không chỉ ra môn Lý",
+          "Vẫn gọi tool dù backend đã trả lỗi",
+          "Crash / raise exception thay vì trả chuỗi lỗi"
+        ]
+      },
+      "actual_result": null,
+      "status": "Pending",
+      "chatbot_baseline_note": "Chatbot thuần không có tầng validation nào, thường bỏ qua dấu trừ và tư vấn như thể HS được 10 điểm tổng — sai nghiêm trọng mà không có tín hiệu cảnh báo."
+    },
+    {
+      "id": "TC21",
+      "category": "edge_case_guardrail",
+      "difficulty": "🔴 Edge case - KHÔNG đủ môn để ghép bất kỳ tổ hợp nào",
+      "priority": "P0",
+      "name": "Chỉ nhập 2 môn - tổ hợp rỗng, phải chỉ đúng môn còn thiếu",
+      "input": "Em thi Toán 8.0 với Văn 7.5 thôi ạ, anh tư vấn ngành và trường giúp em với.",
+      "user_input_form": {
+        "diem_mon": { "toan": 8.0, "van": 7.5 },
+        "so_thich": null,
+        "khu_vuc": [],
+        "rang_buoc_bo_sung": {}
+      },
+      "precondition": "Hàm backend tinh_to_hop(diem_mon) chỉ ghép tổ hợp khi có ĐỦ CẢ 3 môn của tổ hợp đó, và trả về dict RỖNG (không phải null, không raise) khi không tổ hợp nào đủ điều kiện. Bảng định nghĩa 6 tổ hợp (A00/A01/B00/C00/D01/D07) đã nạp. Phiên chat MỚI, giữ được state qua 2 lượt (FR-12).",
+      "test_steps": [
+        "1. Mở phiên chat mới, nhập điểm qua form chỉ với 2 môn Toán và Văn.",
+        "2. Gửi câu hỏi ở trường `input`.",
+        "3. Đọc trace: xác nhận to_hop_kha_dung = {} và số Action = 0 ở lượt này.",
+        "4. Kiểm tra câu trả lời có nêu ĐÍCH DANH môn còn thiếu (Anh → D01) hay chỉ nói chung chung.",
+        "5. Gửi câu bổ sung ở turn 3; xác nhận agent chạy tiếp mà KHÔNG bắt nhập lại Toán/Văn."
+      ],
+      "derived_by_backend": {
+        "to_hop_kha_dung": {},
+        "to_hop_toi_uu": null,
+        "diem_xet_tuyen": null,
+        "mon_da_co": ["toan", "van"],
+        "goi_y_bo_sung": [
+          { "to_hop": "D01", "can_them": ["anh"], "so_mon_thieu": 1 },
+          { "to_hop": "C00", "can_them": ["su", "dia"], "so_mon_thieu": 2 },
+          { "to_hop": "A00", "can_them": ["ly", "hoa"], "so_mon_thieu": 2 }
+        ],
+        "note": "Toán + Văn không nằm cùng nhau trong bất kỳ tổ hợp 3 môn nào ngoài D01 (Toán+Văn+Anh). Backend PHẢI trả dict rỗng, KHÔNG được raise KeyError vì thiếu khoá, và KHÔNG được coi 2 môn là một tổ hợp rồi tính 15.5."
+      },
+      "expected_behavior": {
+        "tool_calls_required": false,
+        "expected_tools": [],
+        "max_tool_calls": 0,
+        "description": "Case này bắt lỗi ở chỗ giao giữa backend và agent. Backend hỏng thường thấy: KeyError khi truy diem_mon['ly'], hoặc âm thầm coi môn thiếu = 0 khiến A00 = 15.5 — một con số hoàn toàn bịa mà HS không cách nào biết là sai. Agent hỏng thường thấy: nhận dict rỗng rồi chỉ nói 'em cần nhập thêm điểm' — đúng nhưng vô dụng, vì HS không biết phải nhập môn nào. Hành vi đúng: chẩn đoán được rằng chỉ cần THÊM MỘT môn Tiếng Anh là mở khoá được tổ hợp D01, và nói ra đúng gợi ý rẻ nhất đó thay vì đọc lại toàn bộ bảng 6 tổ hợp.",
+        "success_criteria": [
+          "Số tool call = 0 ở lượt đầu — không lọc trường khi chưa có điểm xét tuyển",
+          "Backend trả dict rỗng, chương trình không crash, không raise KeyError",
+          "TUYỆT ĐỐI không tự điền môn thiếu = 0 rồi tính ra một tổng tổ hợp nào đó",
+          "Nói rõ Toán + Văn chưa ghép được tổ hợp nào vì mỗi tổ hợp cần đủ 3 môn",
+          "Chỉ ĐÍCH DANH đường ngắn nhất: chỉ cần thêm điểm Tiếng Anh là có tổ hợp D01",
+          "Không đọc lại toàn bộ bảng 6 tổ hợp như một danh sách khô",
+          "Giữ state điểm Toán/Văn — lượt sau chỉ hỏi môn còn thiếu, không bắt nhập lại từ đầu (FR-12)",
+          "Vẫn giữ giọng động viên, không khiến HS thấy mình khai thiếu là lỗi"
+        ],
+        "failure_signals": [
+          "Crash / KeyError khi thiếu khoá môn trong diem_mon",
+          "Tự coi môn thiếu = 0 rồi tính A00 = 15.5 và tư vấn tiếp",
+          "Coi 2 môn Toán + Văn là một 'tổ hợp' và tính điểm xét tuyển = 15.5",
+          "Chỉ nói 'em cần nhập thêm điểm' mà không nêu môn nào",
+          "Vẫn gọi filter_universities dù chưa có diem_xet_tuyen",
+          "Bắt HS nhập lại cả Toán và Văn ở lượt bổ sung"
+        ]
+      },
+      "conversation": [
+        {
+          "turn": 1,
+          "role": "user",
+          "content": "Em thi Toán 8.0 với Văn 7.5 thôi ạ, anh tư vấn ngành và trường giúp em với."
+        },
+        {
+          "turn": 2,
+          "role": "assistant",
+          "expected_action": "Backend trả to_hop_kha_dung = {}. Agent giải thích mỗi tổ hợp cần đủ 3 môn, chỉ rõ chỉ cần thêm điểm Tiếng Anh là có D01, rồi CHỜ. 0 tool call."
+        },
+        { "turn": 3, "role": "user", "content": "À em còn thi Anh 8.5 nữa ạ." },
+        {
+          "turn": 4,
+          "role": "assistant",
+          "expected_action": "Ghép được D01 = 8.0 + 7.5 + 8.5 = 24.0, KHÔNG hỏi lại Toán/Văn. Vì so_thich = null nên chuyển sang survey T0 rồi chạy T1 → T3 bình thường."
+        }
+      ],
+      "actual_result": null,
+      "status": "Pending",
+      "chatbot_baseline_note": "Chatbot thuần không có bảng tổ hợp chuẩn nên thường tự cộng bừa 2 môn hoặc gợi ý sai tổ hợp không tồn tại — HS làm theo sẽ đăng ký nguyện vọng hỏng."
+    },
+    {
+      "id": "TC22",
+      "category": "edge_case_guardrail",
+      "difficulty": "🔴 Bẫy - số HS TỰ KHAI mâu thuẫn với số backend tính",
+      "priority": "P0",
+      "name": "HS nói '27 điểm A00' nhưng cộng 3 môn ra 24.5 - phải nêu lệch, không im lặng chọn bên nào",
+      "input": "Em thi Toán 8.5, Lý 8.0, Hoá 8.0, tổng em được 27 điểm khối A00. Em có cơ hội vào Công nghệ thông tin ĐH Bách Khoa Hà Nội không ạ?",
+      "user_input_form": {
+        "diem_mon": { "toan": 8.5, "ly": 8.0, "hoa": 8.0 },
+        "so_thich": "Công nghệ thông tin",
+        "khu_vuc": ["Hà Nội"],
+        "rang_buoc_bo_sung": {}
+      },
+      "precondition": "Dataset PHẢI có bản ghi (ĐH Bách Khoa Hà Nội · Công nghệ thông tin · A00) với điểm 3 năm 25.6 / 26.0 / 26.3 → P̂₂₀₂₆ = 26.07, σ = 0.29, b = 0.5 (dùng chung seed với TC03). Dataset có ≥ 2 trường CNTT ở Hà Nội với dự báo 2026 ≤ 24.0. Phiên chat MỚI, giữ state qua 2 lượt (FR-12).",
+      "test_steps": [
+        "1. Mở phiên chat mới, nhập điểm qua form theo `user_input_form`.",
+        "2. Gửi câu hỏi ở trường `input` (có chứa con số 27 do HS tự khai).",
+        "3. Đọc trace: xác nhận backend tính A00 = 24.5 và agent phát hiện lệch 2.5 điểm.",
+        "4. Xác nhận ở lượt này agent CHƯA đưa ra phán quyết dựa trên 27 và số Action = 0.",
+        "5. Gửi câu xác nhận ở turn 3, kiểm tra agent chạy tiếp với 24.5 và không hỏi lại điểm từng môn."
+      ],
+      "derived_by_backend": {
+        "to_hop_kha_dung": { "A00": 24.5 },
+        "to_hop_toi_uu": "A00",
+        "diem_xet_tuyen": 24.5,
+        "hs_tu_khai": 27.0,
+        "chenh_lech": 2.5,
+        "note": "So sánh chéo giữa con số HS TỰ KHAI và con số backend TÍNH RA. Trong TC03 hai con số này TRÙNG nhau nên agent chỉ cần xác nhận; ở đây chúng LỆCH 2.5 điểm nên agent buộc phải xử lý mâu thuẫn trước khi tư vấn."
+      },
+      "expected_behavior": {
+        "tool_calls_required": false,
+        "expected_tools": [],
+        "max_tool_calls": 0,
+        "description": "Bẫy nguy hiểm nhất trong nhóm dữ liệu vì nó hỏng ÂM THẦM. Hai cách hỏng đều cho ra câu trả lời trông hoàn toàn bình thường: (a) tin con số 27 HS tự khai → Δ = +0.93 → kết luận 🟢 An toàn → HS đặt nguyện vọng sai và trượt; (b) lặng lẽ dùng 24.5 mà không nói gì → HS vẫn đinh ninh mình 27 điểm, không hiểu vì sao bị xếp ⚫ Ngoài tầm và mất niềm tin vào hệ thống. Cả hai đều không có tín hiệu FAIL nào nhìn thấy được từ bên ngoài, nên case này phải soi trace. Hành vi đúng: nêu thẳng cả hai con số, hỏi nguyên nhân lệch — khả năng cao nhất là HS đã cộng cả điểm ưu tiên khu vực/đối tượng hoặc gõ nhầm một môn — rồi CHỜ HS chốt trước khi chạy phán quyết. Lưu ý: agent không được tự kết luận HS 'tính sai', vì điểm ưu tiên là một lý do hoàn toàn chính đáng.",
+        "success_criteria": [
+          "Số tool call = 0 ở lượt đầu — không chạy phán quyết trên con số chưa chốt",
+          "Nêu RÕ CẢ HAI con số: 24.5 do cộng 3 môn em nhập, và 27 do em tự khai",
+          "Nói rõ mức lệch là 2.5 điểm",
+          "Hỏi lại nguyên nhân, có nêu khả năng điểm ưu tiên khu vực/đối tượng như một lý do hợp lệ",
+          "KHÔNG âm thầm chọn 27 rồi kết luận 🟢 An toàn",
+          "KHÔNG âm thầm chọn 24.5 mà không nhắc gì tới con số 27 HS đã nói",
+          "Không quy kết HS 'tính sai' hay 'khai sai' trước khi hỏi",
+          "Sau khi HS chốt, chạy tiếp bằng 24.5 và KHÔNG bắt nhập lại điểm từng môn (FR-12)",
+          "Kết luận cuối phải là ⚫ Ngoài tầm với Δ = −1.57, đúng như TC03"
+        ],
+        "failure_signals": [
+          "Dùng 27 điểm để tra cứu và kết luận 🟢 An toàn / 🟡 Vừa tầm (Δ = +0.93)",
+          "Dùng 24.5 nhưng hoàn toàn im lặng về con số 27 HS đã nêu",
+          "Tự cộng thêm điểm ưu tiên cho khớp 27 mà HS chưa hề xác nhận",
+          "Lấy trung bình hai con số hoặc chọn con số cao hơn 'cho chắc'",
+          "Nói HS tính sai bằng giọng phê phán trước khi hỏi nguyên nhân",
+          "Bắt HS nhập lại toàn bộ điểm từ đầu ở lượt sau"
+        ]
+      },
+      "conversation": [
+        {
+          "turn": 1,
+          "role": "user",
+          "content": "Em thi Toán 8.5, Lý 8.0, Hoá 8.0, tổng em được 27 điểm khối A00. Em có cơ hội vào Công nghệ thông tin ĐH Bách Khoa Hà Nội không ạ?"
+        },
+        {
+          "turn": 2,
+          "role": "assistant",
+          "expected_action": "Phát hiện lệch: 8.5 + 8.0 + 8.0 = 24.5, trong khi em nói 27. Nêu cả hai con số và mức lệch 2.5, hỏi có phải em đã cộng điểm ưu tiên khu vực/đối tượng, hay gõ nhầm điểm một môn. CHỜ, chưa gọi tool."
+        },
+        {
+          "turn": 3,
+          "role": "user",
+          "content": "À em cộng nhầm ạ, anh cứ dùng điểm em nhập đi."
+        },
+        {
+          "turn": 4,
+          "role": "assistant",
+          "expected_action": "Chốt 24.5, KHÔNG hỏi lại điểm từng môn. Chạy lookup_admission_scores → Δ = 24.5 − 26.07 = −1.57 → ⚫ Ngoài tầm → gọi filter_universities cho phương án thay thế, trả lời đầy đủ 5 bước answer_contract y như TC03."
+        }
+      ],
+      "actual_result": null,
+      "status": "Pending",
+      "chatbot_baseline_note": "ĐỐI CHỨNG QUAN TRỌNG: Chatbot thuần không có bước tính tổ hợp độc lập nên không có gì để đối chiếu — nó tin ngay con số 27 HS đưa ra và tư vấn trên một mức điểm không có thật. Đây là bằng chứng rõ nhất cho giá trị của lớp backend tinh_to_hop() trong trace_eval.md."
     }
   ]
 }
