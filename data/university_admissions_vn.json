@@ -1,0 +1,812 @@
+{
+  "meta": {
+    "dataset_name": "vietnam_university_admissions",
+    "description": "Thông tin tuyển sinh đại học Việt Nam theo vùng miền > trường > ngành",
+    "years_covered": [2024, 2025],
+    "score_scale": "Thang 30 điểm (tổng 3 môn trong tổ hợp xét tuyển)",
+    "university_count": 12,
+    "major_row_count": 53,
+    "structure": "regions[] > universities[] > majors[]",
+    "benchmark_trend_rule": "benchmark_change >= 0.3 -> tăng; -0.3 < change < 0.3 -> ổn định; <= -0.3 -> giảm",
+    "competition_level_rule": "benchmark_2025 >= 27 -> rất cao; 24~27 -> cao; 20~24 -> trung bình; < 20 -> dễ thở",
+    "disclaimer": "Dữ liệu MÔ PHỎNG phục vụ mục đích học tập. Tên trường có thật nhưng điểm chuẩn, chỉ tiêu, học phí là số giả lập, KHÔNG dùng để quyết định nguyện vọng thật."
+  },
+
+  "dimensions": {
+    "exam_blocks": [
+      { "code": "A00", "subjects": "Toán - Lý - Hóa" },
+      { "code": "A01", "subjects": "Toán - Lý - Anh" },
+      { "code": "B00", "subjects": "Toán - Hóa - Sinh" },
+      { "code": "C00", "subjects": "Văn - Sử - Địa" },
+      { "code": "D01", "subjects": "Toán - Văn - Anh" },
+      { "code": "D07", "subjects": "Toán - Hóa - Anh" }
+    ],
+    "university_types": ["Công lập", "Tư thục", "Công lập tự chủ"],
+    "admission_methods": [
+      "Điểm thi THPT",
+      "Xét học bạ",
+      "Đánh giá năng lực",
+      "Đánh giá tư duy",
+      "Xét tuyển thẳng",
+      "Chứng chỉ quốc tế"
+    ],
+    "competition_levels": ["rất cao", "cao", "trung bình", "dễ thở"]
+  },
+
+  "regions": [
+    {
+      "region": "Miền Bắc",
+      "key_cities": ["Hà Nội", "Hải Phòng", "Bắc Ninh"],
+      "universities": [
+        {
+          "university_code": "BKA",
+          "university_name": "Đại học Bách khoa Hà Nội",
+          "city": "Hà Nội",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Đánh giá tư duy", "Xét tuyển thẳng"],
+          "tuition_million_vnd_per_year": 26,
+          "majors": [
+            {
+              "major_name": "Khoa học máy tính",
+              "major_code": "IT1",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 28.5,
+              "benchmark_2025": 28.8,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 300,
+              "competition_level": "rất cao",
+              "note": "Ngành điểm cao nhất trường, chỉ phù hợp học sinh top đầu khối A."
+            },
+            {
+              "major_name": "Kỹ thuật Điện tử - Viễn thông",
+              "major_code": "ET1",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 26.4,
+              "benchmark_2025": 26.7,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 500,
+              "competition_level": "cao",
+              "note": "Hưởng lợi từ làn sóng đầu tư bán dẫn ở phía Bắc."
+            },
+            {
+              "major_name": "Kỹ thuật Cơ điện tử",
+              "major_code": "ME1",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 26.0,
+              "benchmark_2025": 25.8,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 400,
+              "competition_level": "cao",
+              "note": "Đầu ra rộng ở các nhà máy FDI Bắc Ninh, Hải Phòng."
+            },
+            {
+              "major_name": "Kỹ thuật Hóa học",
+              "major_code": "CH1",
+              "exam_blocks": ["A00", "B00"],
+              "benchmark_2024": 23.2,
+              "benchmark_2025": 22.9,
+              "benchmark_change": -0.3,
+              "benchmark_trend": "giảm",
+              "quota_2025": 350,
+              "competition_level": "trung bình",
+              "note": "Điểm chuẩn hạ nhẹ, cơ hội tốt cho học sinh khối A/B tầm 23 điểm."
+            },
+            {
+              "major_name": "Kỹ thuật Vật liệu",
+              "major_code": "MS1",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 21.5,
+              "benchmark_2025": 20.8,
+              "benchmark_change": -0.7,
+              "benchmark_trend": "giảm",
+              "quota_2025": 250,
+              "competition_level": "trung bình",
+              "note": "Ngành dễ đỗ nhất trường, phù hợp học sinh muốn vào Bách khoa với điểm vừa phải."
+            }
+          ]
+        },
+        {
+          "university_code": "NEU",
+          "university_name": "Đại học Kinh tế Quốc dân",
+          "city": "Hà Nội",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Đánh giá năng lực", "Chứng chỉ quốc tế"],
+          "tuition_million_vnd_per_year": 35,
+          "majors": [
+            {
+              "major_name": "Marketing",
+              "major_code": "MKT",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 27.8,
+              "benchmark_2025": 28.1,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 400,
+              "competition_level": "rất cao",
+              "note": "Ngành hot nhất khối kinh tế phía Bắc, cạnh tranh gay gắt."
+            },
+            {
+              "major_name": "Kinh doanh quốc tế",
+              "major_code": "KDQT",
+              "exam_blocks": ["A01", "D01"],
+              "benchmark_2024": 27.5,
+              "benchmark_2025": 27.6,
+              "benchmark_change": 0.1,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 350,
+              "competition_level": "rất cao",
+              "note": "Yêu cầu tiếng Anh tốt, ưu tiên thí sinh có IELTS."
+            },
+            {
+              "major_name": "Kế toán",
+              "major_code": "KTO",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 26.3,
+              "benchmark_2025": 26.1,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 450,
+              "competition_level": "cao",
+              "note": "Chỉ tiêu lớn, điểm chuẩn ổn định qua các năm."
+            },
+            {
+              "major_name": "Quản trị nhân lực",
+              "major_code": "QTNL",
+              "exam_blocks": ["A01", "D01"],
+              "benchmark_2024": 25.8,
+              "benchmark_2025": 26.0,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 200,
+              "competition_level": "cao",
+              "note": "Cửa vào NEU dễ hơn so với Marketing, phù hợp học sinh 26 điểm."
+            }
+          ]
+        },
+        {
+          "university_code": "UET",
+          "university_name": "Đại học Công nghệ - ĐHQG Hà Nội",
+          "city": "Hà Nội",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Đánh giá năng lực", "Xét tuyển thẳng"],
+          "tuition_million_vnd_per_year": 32,
+          "majors": [
+            {
+              "major_name": "Trí tuệ nhân tạo",
+              "major_code": "AI1",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 28.0,
+              "benchmark_2025": 28.5,
+              "benchmark_change": 0.5,
+              "benchmark_trend": "tăng",
+              "quota_2025": 120,
+              "competition_level": "rất cao",
+              "note": "Chỉ tiêu ít, điểm chuẩn tăng nhanh nhất trường."
+            },
+            {
+              "major_name": "Công nghệ thông tin",
+              "major_code": "CN1",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 27.9,
+              "benchmark_2025": 28.3,
+              "benchmark_change": 0.4,
+              "benchmark_trend": "tăng",
+              "quota_2025": 320,
+              "competition_level": "rất cao",
+              "note": "Nhu cầu tuyển dụng IT tăng mạnh kéo điểm chuẩn lên."
+            },
+            {
+              "major_name": "Công nghệ kỹ thuật Cơ điện tử",
+              "major_code": "CDT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 25.6,
+              "benchmark_2025": 25.9,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 180,
+              "competition_level": "cao",
+              "note": "Kết hợp cơ khí - điện tử - lập trình, đầu ra tại nhà máy tự động hóa."
+            },
+            {
+              "major_name": "Kỹ thuật năng lượng",
+              "major_code": "KTNL",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 23.4,
+              "benchmark_2025": 23.2,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 100,
+              "competition_level": "trung bình",
+              "note": "Ngành dễ vào nhất của UET, gắn với xu hướng năng lượng tái tạo."
+            }
+          ]
+        },
+        {
+          "university_code": "BAV",
+          "university_name": "Học viện Ngân hàng",
+          "city": "Hà Nội",
+          "type": "Công lập",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ", "Chứng chỉ quốc tế"],
+          "tuition_million_vnd_per_year": 25,
+          "majors": [
+            {
+              "major_name": "Tài chính",
+              "major_code": "TC",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 26.4,
+              "benchmark_2025": 26.2,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 450,
+              "competition_level": "cao",
+              "note": "Điểm chuẩn đi ngang do thị trường tài chính hồi phục chậm."
+            },
+            {
+              "major_name": "Ngân hàng",
+              "major_code": "NH",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 26.1,
+              "benchmark_2025": 25.9,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 500,
+              "competition_level": "cao",
+              "note": "Chỉ tiêu lớn nhất trường, cơ hội đỗ cao với 26 điểm."
+            },
+            {
+              "major_name": "Kế toán",
+              "major_code": "KTO",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 25.7,
+              "benchmark_2025": 25.5,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 400,
+              "competition_level": "cao",
+              "note": "Lựa chọn an toàn cho học sinh khoảng 25.5 - 26 điểm."
+            },
+            {
+              "major_name": "Luật kinh tế",
+              "major_code": "LKT",
+              "exam_blocks": ["A01", "C00", "D01"],
+              "benchmark_2024": 25.2,
+              "benchmark_2025": 25.4,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 200,
+              "competition_level": "cao",
+              "note": "Nhận cả khối C00, mở đường cho học sinh khối xã hội."
+            }
+          ]
+        },
+        {
+          "university_code": "TMU",
+          "university_name": "Đại học Thương mại",
+          "city": "Hà Nội",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ", "Đánh giá năng lực"],
+          "tuition_million_vnd_per_year": 24,
+          "majors": [
+            {
+              "major_name": "Marketing thương mại",
+              "major_code": "MKT",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 26.8,
+              "benchmark_2025": 27.0,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 300,
+              "competition_level": "rất cao",
+              "note": "Ngành chủ lực của trường, học phí thấp hơn NEU đáng kể."
+            },
+            {
+              "major_name": "Quản trị kinh doanh",
+              "major_code": "QTKD",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 25.6,
+              "benchmark_2025": 25.8,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 350,
+              "competition_level": "cao",
+              "note": "Phổ điểm rộng, phù hợp học sinh khá khối A và D."
+            },
+            {
+              "major_name": "Ngôn ngữ Anh",
+              "major_code": "NNA",
+              "exam_blocks": ["D01"],
+              "benchmark_2024": 25.0,
+              "benchmark_2025": 25.2,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 200,
+              "competition_level": "cao",
+              "note": "Chỉ xét khối D01, môn Anh thường nhân hệ số."
+            },
+            {
+              "major_name": "Quản trị nhân lực",
+              "major_code": "QTNL",
+              "exam_blocks": ["A01", "D01"],
+              "benchmark_2024": 24.8,
+              "benchmark_2025": 24.5,
+              "benchmark_change": -0.3,
+              "benchmark_trend": "giảm",
+              "quota_2025": 180,
+              "competition_level": "cao",
+              "note": "Điểm chuẩn hạ, cơ hội tốt cho học sinh 24.5 - 25 điểm."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "region": "Miền Trung",
+      "key_cities": ["Đà Nẵng", "Huế", "Nha Trang"],
+      "universities": [
+        {
+          "university_code": "DDK",
+          "university_name": "Trường Đại học Bách khoa - Đại học Đà Nẵng",
+          "city": "Đà Nẵng",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ", "Đánh giá năng lực"],
+          "tuition_million_vnd_per_year": 22,
+          "majors": [
+            {
+              "major_name": "Công nghệ thông tin",
+              "major_code": "CNTT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 26.5,
+              "benchmark_2025": 27.0,
+              "benchmark_change": 0.5,
+              "benchmark_trend": "tăng",
+              "quota_2025": 300,
+              "competition_level": "rất cao",
+              "note": "Ngành hot nhất miền Trung, điểm chuẩn tăng theo làn sóng tuyển dụng IT."
+            },
+            {
+              "major_name": "Kỹ thuật điện",
+              "major_code": "KTD",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 23.8,
+              "benchmark_2025": 24.1,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 220,
+              "competition_level": "cao",
+              "note": "Đầu ra tại các dự án điện gió, điện mặt trời khu vực."
+            },
+            {
+              "major_name": "Kỹ thuật cơ khí",
+              "major_code": "KTCK",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 23.0,
+              "benchmark_2025": 23.4,
+              "benchmark_change": 0.4,
+              "benchmark_trend": "tăng",
+              "quota_2025": 250,
+              "competition_level": "trung bình",
+              "note": "Phù hợp học sinh khối A tầm 23 - 24 điểm."
+            },
+            {
+              "major_name": "Kỹ thuật xây dựng",
+              "major_code": "KTXD",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 20.5,
+              "benchmark_2025": 20.2,
+              "benchmark_change": -0.3,
+              "benchmark_trend": "giảm",
+              "quota_2025": 200,
+              "competition_level": "trung bình",
+              "note": "Điểm chuẩn giảm do thị trường bất động sản trầm lắng."
+            },
+            {
+              "major_name": "Kỹ thuật môi trường",
+              "major_code": "KTMT",
+              "exam_blocks": ["A00", "B00"],
+              "benchmark_2024": 17.5,
+              "benchmark_2025": 17.2,
+              "benchmark_change": -0.3,
+              "benchmark_trend": "giảm",
+              "quota_2025": 120,
+              "competition_level": "dễ thở",
+              "note": "Ngành dễ đỗ nhất trường, nhận cả khối B00."
+            }
+          ]
+        },
+        {
+          "university_code": "DDQ",
+          "university_name": "Trường Đại học Kinh tế - Đại học Đà Nẵng",
+          "city": "Đà Nẵng",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ", "Đánh giá năng lực"],
+          "tuition_million_vnd_per_year": 23,
+          "majors": [
+            {
+              "major_name": "Marketing",
+              "major_code": "MKT",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 25.8,
+              "benchmark_2025": 26.2,
+              "benchmark_change": 0.4,
+              "benchmark_trend": "tăng",
+              "quota_2025": 280,
+              "competition_level": "cao",
+              "note": "Ngành điểm cao nhất trường, cạnh tranh tăng dần."
+            },
+            {
+              "major_name": "Kinh doanh quốc tế",
+              "major_code": "KDQT",
+              "exam_blocks": ["A01", "D01"],
+              "benchmark_2024": 25.5,
+              "benchmark_2025": 25.7,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 200,
+              "competition_level": "cao",
+              "note": "Gắn với hoạt động cảng biển và du lịch quốc tế Đà Nẵng."
+            },
+            {
+              "major_name": "Kế toán",
+              "major_code": "KTO",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 23.4,
+              "benchmark_2025": 23.2,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 250,
+              "competition_level": "trung bình",
+              "note": "Lựa chọn an toàn cho học sinh 23 - 24 điểm ở miền Trung."
+            },
+            {
+              "major_name": "Quản trị nhân lực",
+              "major_code": "QTNL",
+              "exam_blocks": ["A01", "D01"],
+              "benchmark_2024": 22.8,
+              "benchmark_2025": 23.0,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 150,
+              "competition_level": "trung bình",
+              "note": "Cửa vào dễ nhất khối kinh tế tại Đà Nẵng."
+            }
+          ]
+        },
+        {
+          "university_code": "DHT",
+          "university_name": "Trường Đại học Khoa học - Đại học Huế",
+          "city": "Huế",
+          "type": "Công lập",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ"],
+          "tuition_million_vnd_per_year": 14,
+          "majors": [
+            {
+              "major_name": "Công nghệ thông tin",
+              "major_code": "CNTT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 21.0,
+              "benchmark_2025": 21.5,
+              "benchmark_change": 0.5,
+              "benchmark_trend": "tăng",
+              "quota_2025": 200,
+              "competition_level": "trung bình",
+              "note": "Học IT với điểm chuẩn và học phí thấp nhất khu vực."
+            },
+            {
+              "major_name": "Báo chí",
+              "major_code": "BC",
+              "exam_blocks": ["C00", "D01"],
+              "benchmark_2024": 19.5,
+              "benchmark_2025": 20.0,
+              "benchmark_change": 0.5,
+              "benchmark_trend": "tăng",
+              "quota_2025": 80,
+              "competition_level": "trung bình",
+              "note": "Lựa chọn hiếm cho học sinh khối C00 ở miền Trung."
+            },
+            {
+              "major_name": "Kỹ thuật điện tử - viễn thông",
+              "major_code": "DTVT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 18.5,
+              "benchmark_2025": 18.2,
+              "benchmark_change": -0.3,
+              "benchmark_trend": "giảm",
+              "quota_2025": 100,
+              "competition_level": "dễ thở",
+              "note": "Điểm chuẩn thấp, phù hợp học sinh trung bình khá khối A."
+            },
+            {
+              "major_name": "Công nghệ sinh học",
+              "major_code": "CNSH",
+              "exam_blocks": ["A00", "B00"],
+              "benchmark_2024": 17.0,
+              "benchmark_2025": 17.0,
+              "benchmark_change": 0.0,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 120,
+              "competition_level": "dễ thở",
+              "note": "Ngành dễ đỗ nhất dataset, dành cho học sinh khối B điểm vừa."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "region": "Miền Nam",
+      "key_cities": ["TP.HCM", "Bình Dương", "Cần Thơ"],
+      "universities": [
+        {
+          "university_code": "QSB",
+          "university_name": "Trường Đại học Bách khoa - ĐHQG TP.HCM",
+          "city": "TP.HCM",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Đánh giá năng lực", "Xét tuyển thẳng"],
+          "tuition_million_vnd_per_year": 30,
+          "majors": [
+            {
+              "major_name": "Khoa học máy tính",
+              "major_code": "KHMT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 28.2,
+              "benchmark_2025": 28.6,
+              "benchmark_change": 0.4,
+              "benchmark_trend": "tăng",
+              "quota_2025": 280,
+              "competition_level": "rất cao",
+              "note": "Top đầu cả nước về kỹ thuật, cạnh tranh cực gắt."
+            },
+            {
+              "major_name": "Kỹ thuật ô tô",
+              "major_code": "KTOT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 25.9,
+              "benchmark_2025": 26.2,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 180,
+              "competition_level": "cao",
+              "note": "Hưởng lợi từ các nhà máy lắp ráp ô tô, xe điện phía Nam."
+            },
+            {
+              "major_name": "Kỹ thuật cơ khí",
+              "major_code": "KTCK",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 24.5,
+              "benchmark_2025": 24.3,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 300,
+              "competition_level": "cao",
+              "note": "Chỉ tiêu lớn, đầu ra ổn định tại khu công nghiệp Bình Dương, Đồng Nai."
+            },
+            {
+              "major_name": "Kỹ thuật xây dựng",
+              "major_code": "KTXD",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 21.8,
+              "benchmark_2025": 21.4,
+              "benchmark_change": -0.4,
+              "benchmark_trend": "giảm",
+              "quota_2025": 250,
+              "competition_level": "trung bình",
+              "note": "Cách dễ nhất để vào Bách khoa TP.HCM khi điểm quanh 21 - 22."
+            }
+          ]
+        },
+        {
+          "university_code": "UIT",
+          "university_name": "Trường Đại học Công nghệ Thông tin - ĐHQG TP.HCM",
+          "city": "TP.HCM",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Đánh giá năng lực", "Xét tuyển thẳng"],
+          "tuition_million_vnd_per_year": 35,
+          "majors": [
+            {
+              "major_name": "Trí tuệ nhân tạo",
+              "major_code": "AI",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 28.3,
+              "benchmark_2025": 28.8,
+              "benchmark_change": 0.5,
+              "benchmark_trend": "tăng",
+              "quota_2025": 100,
+              "competition_level": "rất cao",
+              "note": "Điểm chuẩn cao nhất dataset, chỉ tiêu rất ít."
+            },
+            {
+              "major_name": "Kỹ thuật phần mềm",
+              "major_code": "KTPM",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 27.8,
+              "benchmark_2025": 28.0,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 220,
+              "competition_level": "rất cao",
+              "note": "Ngành truyền thống của trường, tỷ lệ có việc làm rất cao."
+            },
+            {
+              "major_name": "Khoa học dữ liệu",
+              "major_code": "KHDL",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 27.0,
+              "benchmark_2025": 27.4,
+              "benchmark_change": 0.4,
+              "benchmark_trend": "tăng",
+              "quota_2025": 120,
+              "competition_level": "rất cao",
+              "note": "Nhu cầu nhân lực dữ liệu tăng nhanh kéo điểm chuẩn lên."
+            },
+            {
+              "major_name": "An toàn thông tin",
+              "major_code": "ATTT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 26.9,
+              "benchmark_2025": 27.2,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 180,
+              "competition_level": "rất cao",
+              "note": "Ngành khan hiếm nhân lực, lương khởi điểm cao."
+            },
+            {
+              "major_name": "Mạng máy tính và truyền thông dữ liệu",
+              "major_code": "MMT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 25.9,
+              "benchmark_2025": 26.1,
+              "benchmark_change": 0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 200,
+              "competition_level": "cao",
+              "note": "Cửa vào UIT dễ nhất, phù hợp học sinh 26 điểm."
+            }
+          ]
+        },
+        {
+          "university_code": "UEH",
+          "university_name": "Đại học Kinh tế TP.HCM",
+          "city": "TP.HCM",
+          "type": "Công lập tự chủ",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ", "Đánh giá năng lực", "Chứng chỉ quốc tế"],
+          "tuition_million_vnd_per_year": 60,
+          "majors": [
+            {
+              "major_name": "Kinh doanh quốc tế",
+              "major_code": "KDQT",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 27.2,
+              "benchmark_2025": 27.5,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 320,
+              "competition_level": "rất cao",
+              "note": "Ngành dẫn đầu khối kinh tế phía Nam, học phí cao."
+            },
+            {
+              "major_name": "Marketing",
+              "major_code": "MKT",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 27.0,
+              "benchmark_2025": 27.3,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 300,
+              "competition_level": "rất cao",
+              "note": "Nhu cầu tuyển dụng marketing tại TP.HCM tăng mạnh."
+            },
+            {
+              "major_name": "Tài chính - Ngân hàng",
+              "major_code": "TCNH",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 25.8,
+              "benchmark_2025": 25.6,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 400,
+              "competition_level": "cao",
+              "note": "Chỉ tiêu lớn, điểm chuẩn đi ngang hai năm liền."
+            },
+            {
+              "major_name": "Quản trị nhân lực",
+              "major_code": "QTNL",
+              "exam_blocks": ["A01", "D01"],
+              "benchmark_2024": 24.6,
+              "benchmark_2025": 24.9,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 150,
+              "competition_level": "cao",
+              "note": "Phù hợp học sinh khối D muốn học kinh tế tại TP.HCM."
+            },
+            {
+              "major_name": "Kế toán",
+              "major_code": "KTO",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 25.0,
+              "benchmark_2025": 24.8,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 350,
+              "competition_level": "cao",
+              "note": "Cửa vào UEH dễ nhất, điểm chuẩn giảm nhẹ."
+            }
+          ]
+        },
+        {
+          "university_code": "TCT",
+          "university_name": "Đại học Cần Thơ",
+          "city": "Cần Thơ",
+          "type": "Công lập",
+          "admission_methods": ["Điểm thi THPT", "Xét học bạ", "Xét tuyển thẳng"],
+          "tuition_million_vnd_per_year": 13,
+          "majors": [
+            {
+              "major_name": "Sư phạm Toán học",
+              "major_code": "SPT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 26.5,
+              "benchmark_2025": 26.8,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 100,
+              "competition_level": "cao",
+              "note": "Được miễn học phí theo chính sách sư phạm, điểm chuẩn rất cao."
+            },
+            {
+              "major_name": "Công nghệ thông tin",
+              "major_code": "CNTT",
+              "exam_blocks": ["A00", "A01"],
+              "benchmark_2024": 24.0,
+              "benchmark_2025": 24.5,
+              "benchmark_change": 0.5,
+              "benchmark_trend": "tăng",
+              "quota_2025": 300,
+              "competition_level": "cao",
+              "note": "Học IT với học phí thấp nhất dataset, đầu ra chủ yếu tại TP.HCM."
+            },
+            {
+              "major_name": "Quản trị kinh doanh",
+              "major_code": "QTKD",
+              "exam_blocks": ["A00", "A01", "D01"],
+              "benchmark_2024": 23.5,
+              "benchmark_2025": 23.8,
+              "benchmark_change": 0.3,
+              "benchmark_trend": "tăng",
+              "quota_2025": 250,
+              "competition_level": "trung bình",
+              "note": "Lựa chọn kinh tế vừa sức cho học sinh miền Tây."
+            },
+            {
+              "major_name": "Nuôi trồng thủy sản",
+              "major_code": "NTTS",
+              "exam_blocks": ["A00", "B00"],
+              "benchmark_2024": 17.5,
+              "benchmark_2025": 17.2,
+              "benchmark_change": -0.3,
+              "benchmark_trend": "giảm",
+              "quota_2025": 180,
+              "competition_level": "dễ thở",
+              "note": "Ngành thế mạnh vùng ĐBSCL, điểm chuẩn thấp, dễ xin việc tại địa phương."
+            },
+            {
+              "major_name": "Nông học",
+              "major_code": "NHO",
+              "exam_blocks": ["A00", "B00"],
+              "benchmark_2024": 17.0,
+              "benchmark_2025": 16.8,
+              "benchmark_change": -0.2,
+              "benchmark_trend": "ổn định",
+              "quota_2025": 150,
+              "competition_level": "dễ thở",
+              "note": "Điểm chuẩn thấp nhất dataset, phù hợp học sinh khối B điểm vừa phải."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
