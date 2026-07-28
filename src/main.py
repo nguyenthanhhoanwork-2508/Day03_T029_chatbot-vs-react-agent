@@ -98,6 +98,32 @@ class ChatService:
         self.model_name = getattr(self._provider, "model_name", "offline-mock")
 
     def chat(self, message: str) -> ChatResponse:
+        '''Resolve one user question without exposing internal trace data.'''
+        return self._chat(message)
+
+    def chat_with_trace(self, message: str):
+        '''Return the public response and a Role 5 evaluation trace.'''
+        trace_steps = []
+        response = self._chat(message, trace_steps=trace_steps)
+        termination_reason = 'input_validation'
+        if trace_steps:
+            termination_reason = str(
+                trace_steps[-1].get('termination_reason') or 'unknown'
+            )
+        trace = {
+            'question': str(message).strip(),
+            'backend': response.backend,
+            'provider': response.provider,
+            'model': response.model,
+            'steps': trace_steps,
+            'termination_reason': termination_reason,
+            'tool_calls': response.tool_calls,
+            'is_error': response.is_error,
+            'final_answer': response.content,
+        }
+        return response, trace
+
+    def _chat(self, message: str, *, trace_steps=None) -> ChatResponse:
         """Resolve one user question through the guarded ReAct loop."""
         clean_message = str(message).strip()
         if not clean_message:
@@ -109,11 +135,11 @@ class ChatService:
             )
 
         try:
-            return self._run_react(clean_message)
+            return self._run_react(clean_message, trace_steps=trace_steps)
         except Exception as error:
             return self._error(f"Không thể hoàn tất phiên tư vấn: {error}")
 
-    def _run_react(self, question: str) -> ChatResponse:
+    def _run_react(self, question: str, *, trace_steps=None) -> ChatResponse:
         scratchpad: list[str] = []
         seen_actions: set[str] = set()
         tool_calls = 0
@@ -128,6 +154,12 @@ class ChatService:
             ).strip()
 
             if model_output.startswith(PROVIDER_ERROR_PREFIXES):
+                self._append_trace(
+                    trace_steps,
+                    step=step,
+                    model_step=self._safe_model_step(model_output),
+                    termination_reason='provider_error',
+                )
                 return self._response(
                     model_output,
                     tool_calls=tool_calls,
@@ -136,8 +168,16 @@ class ChatService:
 
             final_answer = self._extract_final_answer(model_output)
             if final_answer is not None:
+                public_answer = self._sanitize_public_answer(final_answer)
+                self._append_trace(
+                    trace_steps,
+                    step=step,
+                    model_step=self._safe_model_step(model_output),
+                    final_answer=public_answer,
+                    termination_reason='final_answer',
+                )
                 return self._response(
-                    self._sanitize_public_answer(final_answer),
+                    public_answer,
                     tool_calls=tool_calls,
                     is_error=False,
                 )
@@ -151,6 +191,12 @@ class ChatService:
                         f"Observation: LỖI: {error}",
                     ]
                 )
+                self._append_trace(
+                    trace_steps,
+                    step=step,
+                    model_step=self._safe_model_step(model_output),
+                    observation=f'LỖI: {error}',
+                )
                 continue
 
             trusted_step = model_output[: action.output_end].strip()
@@ -159,6 +205,7 @@ class ChatService:
                 f"{json.dumps(action.arguments, ensure_ascii=False, sort_keys=True)}"
             )
 
+            action_executed = False
             if action.tool_name not in AVAILABLE_TOOLS:
                 observation = (
                     f"LỖI: Tool '{action.tool_name}' không tồn tại. "
@@ -173,6 +220,7 @@ class ChatService:
                 seen_actions.add(action_key)
                 observation = self._execute_tool(action.tool_name, action.arguments)
                 tool_calls += 1
+                action_executed = True
 
             scratchpad.extend(
                 [
@@ -180,7 +228,20 @@ class ChatService:
                     f"Observation: {observation}",
                 ]
             )
+            self._append_trace(
+                trace_steps,
+                step=step,
+                model_step=trusted_step,
+                action={
+                    'tool': action.tool_name,
+                    'arguments': action.arguments,
+                    'executed': action_executed,
+                },
+                observation=observation,
+            )
 
+        if trace_steps:
+            trace_steps[-1]['termination_reason'] = 'max_iterations'
         return self._response(
             (
                 "VeS chưa thể hoàn tất câu trả lời có kiểm chứng trong giới hạn "
@@ -189,6 +250,31 @@ class ChatService:
             ),
             tool_calls=tool_calls,
             is_error=True,
+        )
+
+    @staticmethod
+    def _append_trace(
+        trace_steps,
+        *,
+        step,
+        model_step,
+        action=None,
+        observation=None,
+        final_answer=None,
+        termination_reason=None,
+    ):
+        '''Append one application-controlled event to an evaluation trace.'''
+        if trace_steps is None:
+            return
+        trace_steps.append(
+            {
+                'step': step,
+                'model_step': model_step,
+                'action': action,
+                'observation': observation,
+                'final_answer': final_answer,
+                'termination_reason': termination_reason,
+            }
         )
 
     def _build_model_prompt(
