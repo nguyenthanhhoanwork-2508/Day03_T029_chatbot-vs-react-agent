@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "dataset_name": "vietnam_job_market_trends",
+    "description": "Xu hướng tuyển dụng tại Việt Nam theo năm > nhóm ngành > vùng miền",
+    "years_covered": [2024, 2025],
+    "row_count": 30,
+    "growth_pct_meaning": "Phần trăm thay đổi số tin tuyển dụng so với năm liền trước",
+    "trend_labels": ["tăng mạnh (>=10%)", "tăng (3~10%)", "ổn định (-3~3%)", "giảm (-10~-3%)", "giảm mạnh (<-10%)"],
+    "disclaimer": "Dữ liệu MÔ PHỎNG phục vụ mục đích học tập, không phải số liệu thị trường thật."
+  },
+  "years": [
+    {
+      "year": 2024,
+      "industries": [
+        {
+          "industry": "IT - Phần mềm",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 16800, "growth_pct": 8.5,  "trend": "tăng" },
+            { "region": "Miền Trung", "job_postings": 4200,  "growth_pct": 5.1,  "trend": "tăng" },
+            { "region": "Miền Nam",  "job_postings": 22400, "growth_pct": 9.8,  "trend": "tăng" }
+          ]
+        },
+        {
+          "industry": "Quản trị - Nhân sự",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 6300, "growth_pct": 3.4, "trend": "tăng" },
+            { "region": "Miền Trung", "job_postings": 1850, "growth_pct": 2.1, "trend": "ổn định" },
+            { "region": "Miền Nam",  "job_postings": 8100, "growth_pct": 4.2, "trend": "tăng" }
+          ]
+        },
+        {
+          "industry": "Kinh tế - Tài chính - Ngân hàng",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 11200, "growth_pct": -2.5, "trend": "ổn định" },
+            { "region": "Miền Trung", "job_postings": 2600,  "growth_pct": -4.1, "trend": "giảm" },
+            { "region": "Miền Nam",  "job_postings": 14800, "growth_pct": -1.8, "trend": "ổn định" }
+          ]
+        },
+        {
+          "industry": "Marketing - Truyền thông",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 7400,  "growth_pct": 6.0, "trend": "tăng" },
+            { "region": "Miền Trung", "job_postings": 2100,  "growth_pct": 3.8, "trend": "tăng" },
+            { "region": "Miền Nam",  "job_postings": 10500, "growth_pct": 8.3, "trend": "tăng" }
+          ]
+        },
+        {
+          "industry": "Sản xuất - Cơ khí",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 19600, "growth_pct": 11.4, "trend": "tăng mạnh" },
+            { "region": "Miền Trung", "job_postings": 6800,  "growth_pct": 6.5,  "trend": "tăng" },
+            { "region": "Miền Nam",  "job_postings": 17300, "growth_pct": 4.9,  "trend": "tăng" }
+          ]
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "industries": [
+        {
+          "industry": "IT - Phần mềm",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 19320, "growth_pct": 15.0, "trend": "tăng mạnh" },
+            { "region": "Miền Trung", "job_postings": 4704,  "growth_pct": 12.0, "trend": "tăng mạnh" },
+            { "region": "Miền Nam",  "job_postings": 25400, "growth_pct": 13.4, "trend": "tăng mạnh" }
+          ]
+        },
+        {
+          "industry": "Quản trị - Nhân sự",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 6650, "growth_pct": 5.6, "trend": "tăng" },
+            { "region": "Miền Trung", "job_postings": 1930, "growth_pct": 4.3, "trend": "tăng" },
+            { "region": "Miền Nam",  "job_postings": 8600, "growth_pct": 6.2, "trend": "tăng" }
+          ]
+        },
+        {
+          "industry": "Kinh tế - Tài chính - Ngân hàng",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 11650, "growth_pct": 4.0, "trend": "tăng" },
+            { "region": "Miền Trung", "job_postings": 2650,  "growth_pct": 1.9, "trend": "ổn định" },
+            { "region": "Miền Nam",  "job_postings": 15900, "growth_pct": 7.4, "trend": "tăng" }
+          ]
+        },
+        {
+          "industry": "Marketing - Truyền thông",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 7850,  "growth_pct": 6.1,  "trend": "tăng" },
+            { "region": "Miền Trung", "job_postings": 2180,  "growth_pct": 3.8,  "trend": "tăng" },
+            { "region": "Miền Nam",  "job_postings": 11600, "growth_pct": 10.5, "trend": "tăng mạnh" }
+          ]
+        },
+        {
+          "industry": "Sản xuất - Cơ khí",
+          "regions": [
+            { "region": "Miền Bắc",  "job_postings": 22300, "growth_pct": 13.8, "trend": "tăng mạnh" },
+            { "region": "Miền Trung", "job_postings": 7250,  "growth_pct": 6.6,  "trend": "tăng" },
+            { "region": "Miền Nam",  "job_postings": 18100, "growth_pct": 4.6,  "trend": "tăng" }
+          ]
+        }
+      ]
+    }
+  ]
+}
