@@ -272,7 +272,7 @@ Cấu trúc khuyến nghị **~10 nguyện vọng**:
 | **FR-12** | Giữ ngữ cảnh trong 1 phiên (điểm, sở thích, khu vực, ngân sách) qua nhiều lượt hỏi | P2 | Tất cả |
 | **FR-13** | Toàn bộ đầu ra là **văn bản + bảng markdown**, không sinh ảnh/biểu đồ | P0 | Tất cả |
 
-> ~~FR cũ: chi tiết chương trình đào tạo (thời lượng, độ nặng)~~ — **cắt khỏi MVP**. Học phí đã có sẵn trong output của `filter_universities`, không cần tool riêng.
+>  **cắt khỏi MVP**. Học phí đã có sẵn trong output của `filter_universities`, không cần tool riêng.
 
 ---
 
