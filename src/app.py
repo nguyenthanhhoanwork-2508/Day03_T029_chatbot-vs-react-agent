@@ -13,7 +13,7 @@ from html import escape
 
 import streamlit as st
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from main import ChatService, create_chat_service
 
