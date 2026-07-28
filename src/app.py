@@ -345,6 +345,46 @@ st.markdown(
             white-space: pre-wrap;
         }
 
+        .ves-thinking-message {
+            display: flex;
+            width: 100%;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 0.7rem;
+            margin: 0 0 16px;
+        }
+
+        .ves-thinking-bubble {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.72rem 0.95rem;
+            border: 1px solid #D8E6FF;
+            border-radius: 20px 20px 20px 7px;
+            background: #FFFFFF;
+            color: var(--ves-muted);
+            box-shadow: 0 8px 28px rgba(37, 99, 235, 0.055);
+            font-size: 0.88rem;
+            font-weight: 560;
+        }
+
+        .ves-thinking-spinner {
+            width: 17px;
+            height: 17px;
+            flex: 0 0 17px;
+            border: 2px solid #D8E6FF;
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: ves-spin 0.75s linear infinite;
+        }
+
+        @keyframes ves-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .st-key-chat_composer {
             position: fixed !important;
             z-index: 1000;
@@ -486,6 +526,7 @@ def initialize_session() -> None:
 def clear_conversation() -> None:
     """Clear only the existing message list."""
     st.session_state.messages = []
+    st.session_state.pop("_pending_prompt", None)
     st.rerun()
 
 
@@ -574,6 +615,23 @@ def render_history() -> None:
                     """,
                     unsafe_allow_html=True,
                 )
+        if st.session_state.get("_pending_prompt"):
+            st.markdown(
+                """
+                <div
+                    class="ves-thinking-message"
+                    aria-label="VeS đang suy nghĩ"
+                    aria-live="polite"
+                >
+                    <div class="ves-assistant-avatar" aria-hidden="true">VeS</div>
+                    <div class="ves-thinking-bubble">
+                        <span class="ves-thinking-spinner" aria-hidden="true"></span>
+                        <span>VeS đang suy nghĩ...</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
 
 def render_chat_composer(service: ChatService) -> str | None:
@@ -586,9 +644,14 @@ def render_chat_composer(service: ChatService) -> str | None:
         )
         with input_column:
             prompt = st.chat_input(
-                "Nhập điểm thi, sở thích hoặc câu hỏi của bạn...",
+                (
+                    "VeS đang trả lời..."
+                    if st.session_state.get("_pending_prompt")
+                    else "Nhập điểm thi, sở thích hoặc câu hỏi của bạn..."
+                ),
                 max_chars=service.max_message_length,
                 key="fixed_chat_input",
+                disabled=bool(st.session_state.get("_pending_prompt")),
             )
         with clear_column:
             if st.button(
@@ -601,9 +664,19 @@ def render_chat_composer(service: ChatService) -> str | None:
 
 
 def submit_message(service: ChatService, prompt: str) -> None:
-    """Call the unchanged backend and append to the existing message list."""
+    """Show the user message immediately, then schedule one model call."""
     st.session_state.messages.append({"role": "user", "content": prompt})
-    response = service.chat(prompt)
+    st.session_state["_pending_prompt"] = prompt
+    st.rerun()
+
+
+def process_pending_message(service: ChatService) -> None:
+    """Replace the visible thinking state with one model response."""
+    pending_prompt = st.session_state.get("_pending_prompt")
+    if not pending_prompt:
+        return
+
+    response = service.chat(str(pending_prompt))
     st.session_state.messages.append(
         {
             "role": "assistant",
@@ -612,6 +685,7 @@ def submit_message(service: ChatService, prompt: str) -> None:
             "is_error": response.is_error,
         }
     )
+    st.session_state.pop("_pending_prompt", None)
     st.rerun()
 
 
@@ -633,6 +707,8 @@ def run_app() -> None:
 
     if prompt:
         submit_message(service, prompt)
+
+    process_pending_message(service)
 
 
 if __name__ == "__main__":
