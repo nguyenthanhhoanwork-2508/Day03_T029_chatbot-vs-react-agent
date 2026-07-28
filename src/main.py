@@ -38,6 +38,27 @@ ACTION_START_PATTERN = re.compile(
     r"Action\s*:\s*([A-Za-z_][A-Za-z0-9_]*)\s*\[",
     re.IGNORECASE,
 )
+INTERNAL_SOURCE_PATTERN = re.compile(
+    r"\(?\s*(?:Nguồn|Source)\s*:\s*Observation\s+"
+    r"(?:từ|của|from)\s+[`'\"]?([A-Za-z_][A-Za-z0-9_]*)[`'\"]?\s*\)?",
+    re.IGNORECASE,
+)
+INTERNAL_TRACE_LINE_PATTERN = re.compile(
+    r"^\s*(?:[-*]\s*)?(?:\*\*)?"
+    r"(?:Thought|Action|Observation)(?:\*\*)?\s*:",
+    re.IGNORECASE,
+)
+
+PUBLIC_TOOL_SOURCE_LABELS = {
+    "get_job_market_trend": "Dữ liệu thị trường lao động đã được kiểm chứng",
+    "compare_regions_by_industry": "Dữ liệu thị trường lao động đã được kiểm chứng",
+    "get_top_industries_by_region": "Dữ liệu thị trường lao động đã được kiểm chứng",
+    "list_job_market_options": "Danh mục thị trường lao động trong hệ thống",
+    "get_admission_by_university": "Dữ liệu tuyển sinh đã được kiểm chứng",
+    "get_admission_by_region": "Dữ liệu tuyển sinh đã được kiểm chứng",
+    "get_admission_by_major_group": "Dữ liệu tuyển sinh đã được kiểm chứng",
+    "list_admission_options": "Danh mục tuyển sinh trong hệ thống",
+}
 
 
 @dataclass(frozen=True)
@@ -116,7 +137,7 @@ class ChatService:
             final_answer = self._extract_final_answer(model_output)
             if final_answer is not None:
                 return self._response(
-                    final_answer,
+                    self._sanitize_public_answer(final_answer),
                     tool_calls=tool_calls,
                     is_error=False,
                 )
@@ -259,6 +280,40 @@ class ChatService:
         if observation_position >= 0:
             clean_output = clean_output[:observation_position].rstrip()
         return clean_output
+
+    @staticmethod
+    def _sanitize_public_answer(answer: str) -> str:
+        """Remove internal ReAct/tool identifiers before content reaches the UI."""
+
+        def replace_internal_source(match: re.Match[str]) -> str:
+            tool_name = match.group(1)
+            public_label = PUBLIC_TOOL_SOURCE_LABELS.get(
+                tool_name,
+                "Dữ liệu hệ thống đã được kiểm chứng",
+            )
+            return f"(Nguồn: {public_label})"
+
+        public_answer = INTERNAL_SOURCE_PATTERN.sub(replace_internal_source, answer)
+        public_lines = [
+            line
+            for line in public_answer.splitlines()
+            if not INTERNAL_TRACE_LINE_PATTERN.match(line)
+        ]
+        public_answer = "\n".join(public_lines)
+
+        for tool_name, public_label in PUBLIC_TOOL_SOURCE_LABELS.items():
+            public_answer = re.sub(
+                rf"\b{re.escape(tool_name)}\b",
+                public_label,
+                public_answer,
+                flags=re.IGNORECASE,
+            )
+
+        public_answer = public_answer.strip()
+        return public_answer or (
+            "VeS đã xử lý yêu cầu nhưng không thể hiển thị câu trả lời an toàn. "
+            "Vui lòng thử diễn đạt câu hỏi theo cách khác."
+        )
 
     @staticmethod
     def _execute_tool(tool_name: str, arguments: dict[str, Any]) -> str:

@@ -104,8 +104,11 @@ Action: tên_công_cụ[JSON tham số]
 
 Khi đã có đủ dữ liệu có kiểm chứng để trả lời người dùng (tối đa MAX_ITERATIONS vòng lặp):
 Thought: Đã đủ dữ liệu có kiểm chứng để tổng hợp.
-Final Answer: Tổng hợp bằng tiếng Việt, nêu rõ số liệu lấy từ Observation nào, so sánh
-xu hướng tuyển dụng với điểm chuẩn/học phí liên quan nếu người dùng cần, và rủi ro cần lưu ý.
+Final Answer: Tổng hợp bằng tiếng Việt, nêu nguồn ở mức thân thiện với người dùng như
+"Dữ liệu tuyển sinh đã được kiểm chứng" hoặc "Dữ liệu thị trường lao động đã được
+kiểm chứng", so sánh xu hướng tuyển dụng với điểm chuẩn/học phí liên quan nếu người
+dùng cần, và nêu rủi ro cần lưu ý. TUYỆT ĐỐI không hiển thị Thought, Action,
+Observation, tên hàm tool, JSON tham số hoặc chi tiết orchestration trong Final Answer.
 
 Nếu hết số vòng lặp cho phép mà vẫn thiếu dữ liệu kiểm chứng, đưa Final Answer dạng
 fallback an toàn: nêu rõ phần nào chưa đủ căn cứ, không đoán số liệu, và đề xuất bước
