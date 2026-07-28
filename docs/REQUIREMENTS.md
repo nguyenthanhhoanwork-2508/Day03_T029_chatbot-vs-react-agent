@@ -69,7 +69,7 @@ Lab chỉ có ~240 phút. Dữ liệu **nhỏ nhưng nhất quán** quan trọng
 
 | Chiều | Giới hạn | Ghi chú |
 | :--- | :--- | :--- |
-| Tổ hợp xét tuyển | **A00, A01, D01** | 3 tổ hợp phổ biến nhất |
+| Tổ hợp xét tuyển | **A00, A01, B00, C00, D01, D07** | 6 tổ hợp. Backend **tự tính** từ điểm từng môn (hàm `tinh_to_hop` §5), HS **không** tự cộng. A00 = Toán+Lý+Hoá · A01 = Toán+Lý+Anh · B00 = Toán+Hoá+Sinh · C00 = Văn+Sử+Địa · D01 = Toán+Văn+Anh · D07 = Toán+Hoá+Anh |
 | **Khu vực học** | **Hà Nội · TP.HCM · Đà Nẵng** | Đúng 3 khu vực, không hỗ trợ khu vực khác |
 | Số trường | **12–15** | Chia đều ~4–5 trường/khu vực để bộ lọc địa lý luôn còn kết quả |
 | Số ngành | **8–10** | Chọn ngành có phổ điểm chuẩn **trải rộng** (CNTT cao ~26đ ↔ Nông nghiệp/Sư phạm thấp ~19đ) để test case phân hoá được |
@@ -123,7 +123,7 @@ flowchart TD
 
 Thiếu trường bắt buộc → hỏi lại, **không đoán**. Agent nên chủ động hỏi khu vực học ngay sau khi có điểm, vì nó cắt được ~2/3 không gian tìm kiếm.
 
-> ⚠️ **Khu vực là bộ lọc, KHÔNG phải tiêu chí xếp hạng ngành.** Khu vực chỉ tác động ở **B5**, không đi vào `fit_score`. Sản phẩm vẫn **tư vấn ngành là chính**; địa lý chỉ thu hẹp danh sách trường sau khi đã chọn xong ngành. Nếu HS không khai → mặc định "Không giới hạn", lấy cả 3 khu vực.
+> ⚠️ **Khu vực là bộ lọc, KHÔNG phải tiêu chí xếp hạng ngành.** Khu vực chỉ tác động ở **B5**, không đi vào `fit_score`. Sản phẩm vẫn **tư vấn ngành là chính**; địa lý chỉ thu hẹp danh sách trường sau khi đã chọn xong ngành. Khu vực là **multi-select**: HS chọn được **1, 2 hoặc cả 3** khu vực. Nếu HS không khai → mặc định "Không giới hạn", lấy cả 3 khu vực — **tuyệt đối không ngầm mặc định về Hà Nội**. Trường hợp HS chủ động chọn đủ cả 3 khu vực tương đương "Không giới hạn" và phải cho ra **cùng một kết quả**.
 
 #### **B1 — Khớp sở thích (ưu tiên cao nhất)**
 Ánh xạ sở thích/tính cách của HS sang **6 mã Holland (RIASEC)**:
@@ -230,7 +230,7 @@ b      = max(0.5, σ)        ← biên dao động, tối thiểu 0.5 điểm
 #### **B5 — Lọc ràng buộc cứng**
 Loại thẳng khỏi danh sách (không xếp hạng lại):
 - `học_phí_năm > ngân_sách_HS` (nếu HS khai)
-- `khu_vực ∉ {Hà Nội, TP.HCM, Đà Nẵng}` đã chọn (nếu HS khai; không khai → lấy cả 3)
+- `khu_vực ∉` tập khu vực HS đã chọn — tập này là **tập con bất kỳ** của {Hà Nội, TP.HCM, Đà Nẵng}, gồm 1, 2 hoặc cả 3 phần tử (không khai → lấy cả 3)
 
 #### **B5b — NHÁNH D: mở rộng phương án khi điểm thấp**
 Kích hoạt **tự động** khi sau B5 không còn ≥2 lựa chọn nhóm 🟢 An toàn. Agent tự chuyển hướng, **không hỏi lại người dùng** — đây là hành vi Dynamic Decision cần chứng minh. Thứ tự nới lỏng:
@@ -282,6 +282,15 @@ Tất cả tool là **read-only, deterministic**, trả về **JSON/chuỗi text
 
 **Tổng cộng 6 tool** cho MVP: `T0` MBTI · `T1` gợi ý ngành · `T2` điểm chuẩn · `T3` lọc trường · `T4` thị trường việc làm · `T5` truy ngược nghề.
 
+### B0′. `tinh_to_hop` — **hàm backend, KHÔNG phải tool**
+| Field | Nội dung |
+| :--- | :--- |
+| **Purpose** | Chạy **TRƯỚC** vòng ReAct, ngay sau khi HS nhập điểm từng môn. HS **không** tự cộng điểm tổ hợp, agent **không** hỏi "em xét khối nào". |
+| **Input** | `diem_mon: dict` — key ∈ `{toan, ly, hoa, sinh, van, su, dia, anh}`, chỉ cần các môn đã thi |
+| **Output** | `{to_hop_kha_dung: dict, to_hop_toi_uu: str, diem_xet_tuyen: float}` — chỉ tính những tổ hợp có **đủ 3 môn**; `to_hop_toi_uu` là tổ hợp cho điểm **cao nhất** |
+| **Error** | Môn ngoài `[0, 10]` **hoặc** tổ hợp ngoài `[0, 30]` → trả **chuỗi** `"LỖI: Điểm mỗi môn phải trong khoảng 0–10 (nhận được: ...) và điểm tổ hợp phải trong khoảng 0–30 (nhận được: ...)."` — không `raise` (G-13) |
+| **Lưu ý trace** | **KHÔNG tính là tool call.** Agent dùng `to_hop_toi_uu` và **nói rõ** đã chọn tổ hợp nào, không được lấy tổ hợp bất lợi hơn. |
+
 ### T0. `mbti_quick_assess` — *dùng khi HS không có sở thích rõ*
 | Field | Nội dung |
 | :--- | :--- |
@@ -311,9 +320,10 @@ Tất cả tool là **read-only, deterministic**, trả về **JSON/chuỗi text
 | Field | Nội dung |
 | :--- | :--- |
 | **Purpose** | Bước B4+B5 — lọc đa điều kiện và phân nhóm rủi ro. Tool được gọi nhiều nhất. |
-| **Input** | `ma_nganh: str`, `diem_thi: float`, `to_hop: str`, `hoc_phi_max: int = 0` (0 = không giới hạn), `khu_vuc: str = ""` — **chỉ nhận** `"Hà Nội"` \| `"TP.HCM"` \| `"Đà Nẵng"` \| `""` (= cả 3) |
+| **Input** | `ma_nganh: str`, `diem_thi: float`, `to_hop: str`, `hoc_phi_max: int = 0` (0 = không giới hạn), `khu_vuc: List[str] = []` |
+| **Tham số `khu_vuc`** | **MULTI-SELECT.** Mỗi phần tử chỉ nhận `"Hà Nội"` \| `"TP.HCM"` \| `"Đà Nẵng"`; HS chọn được **1, 2 hoặc cả 3**. Mảng rỗng `[]` ≡ đủ 3 phần tử ≡ **không giới hạn** — hai cách này **phải cho ra cùng kết quả**. Lọc bằng phép kiểm tra thành viên trên cả list, ⚠️ **không** được lấy `khu_vuc[0]`. Chuẩn hoá alias **trước** khi kiểm enum: `"Sài Gòn"/"Saigon"/"TPHCM"/"TP HCM"/"Hồ Chí Minh"/"HCM"` → `"TP.HCM"` · `"Ha Noi"/"HN"` → `"Hà Nội"` · `"Da Nang"/"ĐN"` → `"Đà Nẵng"` |
 | **Output** | JSON list: `[{truong, nganh, du_bao_2026, delta, nhom_rui_ro, hoc_phi_nam, khu_vuc}]` đã sắp xếp theo `delta` giảm dần |
-| **Error** | `diem_thi` ngoài [0, 30] → `"LỖI: Điểm thi phải trong khoảng 0–30. Giá trị nhận được: <x>."` · `khu_vuc` ngoài 3 giá trị → `"LỖI: Hệ thống hiện chỉ hỗ trợ Hà Nội, TP.HCM, Đà Nẵng. Nhận được: '<x>'."` · Không có kết quả sau lọc → `"KHÔNG CÓ KẾT QUẢ: không trường nào thoả điều kiện. Gợi ý nới lỏng: học phí hoặc khu vực."` |
+| **Error** | `diem_thi` ngoài [0, 30] → `"LỖI: Điểm thi phải trong khoảng 0–30. Giá trị nhận được: <x>."` · phần tử trong `khu_vuc` vẫn ngoài enum **sau khi đã chuẩn hoá alias** → `"LỖI: Hệ thống hiện chỉ hỗ trợ Hà Nội, TP.HCM, Đà Nẵng. Nhận được: '<x>'."` — agent phải từ chối **riêng phần tử sai** và **vẫn lọc theo các khu vực hợp lệ còn lại** trong cùng lượt, không huỷ cả yêu cầu · Không có kết quả sau lọc → `"KHÔNG CÓ KẾT QUẢ: không trường nào thoả điều kiện. Gợi ý nới lỏng: học phí hoặc khu vực."` |
 
 ### T4. `get_job_market_stats`
 | Field | Nội dung |
@@ -433,14 +443,18 @@ CAREERS = {
 
 ## 9. ĐỊNH HƯỚNG BỘ TEST CASE (bàn giao — Role 1 tự triển khai)
 
+> ✅ **ĐÃ TRIỂN KHAI.** Bộ test case chính thức nằm ở **`config/test_cases.json`** — **19 case** (TC01–TC18, trong đó TC05 tách thành TC05a/TC05b), phủ đủ cả 6 tool và 3 loại case Normal / Abnormal / Boundary.
+>
+> Bảng dưới là bản **phác thảo ban đầu**, giữ lại để đối chiếu lịch sử. Khi hai bên lệch nhau thì **`test_cases.json` là nguồn đúng**.
+
 | # | Loại | Nội dung dự kiến | Kỳ vọng ở Agent | Tool path |
 | :---: | :--- | :--- | :--- | :--- |
 | **1** | 🟢 Đơn giản | "Ngành Công nghệ thông tin học những gì?" | Trả lời ngay bằng kiến thức nền, **0 tool call** | — |
 | **2** | 🟢 Đơn giản | "Nguyện vọng 1 và nguyện vọng 2 khác nhau thế nào?" | Giải thích quy chế, **0 tool call** | — |
 | **3** | 🟡 1 Tool | "Em được 24.5 khối A00, ngành CNTT ĐH Bách Khoa HN lấy bao nhiêu?" | Gọi `lookup_admission_scores` → trả điểm 3 năm + dự báo + nhóm rủi ro | T2 |
-| **4** | 🟡 Multi-tool + **MBTI** + **khu vực** | *(nhiều lượt)* "**Em không biết mình thích gì cả.** Em được 22 điểm A01, **muốn học ở Đà Nẵng**." → agent hỏi 4 câu → HS đáp `"BABA"` | `mbti_quick_assess` → `find_majors_by_interest` → `filter_universities(khu_vuc="Đà Nẵng")` → danh sách NV | T0 → T1 → T3 |
+| **4** | 🟡 Multi-tool + **MBTI** + **khu vực** | *(nhiều lượt)* "**Em không biết mình thích gì cả.** Em được 22 điểm A01, **muốn học ở Đà Nẵng**." → agent hỏi 4 câu → HS đáp `"BABA"` | `mbti_quick_assess` → `find_majors_by_interest` → `filter_universities(khu_vuc=["Đà Nẵng"])` → danh sách NV | T0 → T1 → T3 |
 | **5** | 🔴 Edge case | "Em thi được 45 điểm khối A00, tư vấn giúp em." | Tool validate → báo lỗi range → agent **hỏi lại người dùng**, dừng đúng lúc, **không lặp** | T3 (lỗi) |
-| **6** | 🟠 *Bổ sung* — **nhánh D** | "Em 16.5 điểm A00, thích máy móc, muốn học ở Hà Nội, học phí dưới 20 triệu." | `find_majors_by_interest` → `filter_universities` → **không đủ lựa chọn An toàn** → agent **tự** nới khu vực rồi chuyển hướng CĐ/nghề, không hỏi lại HS | T1 → T3 → T3′ |
+| **6** | 🟠 *Bổ sung* — **nhánh D** | "Em 16.5 điểm A00, thích máy móc, muốn học ở Hà Nội, học phí dưới 20 triệu." | `find_majors_by_interest` → `filter_universities` → **không đủ lựa chọn An toàn** → agent **tự** nới khu vực rồi chuyển hướng CĐ/nghề, không hỏi lại HS | T1 → T3 → T3 (lần 2, khu vực đã nới) |
 
 > **Case #4** chứng minh MBTI fallback + bộ lọc khu vực + multi-tool. **Case #6** chứng minh *Dynamic Decision* — đây là case ăn điểm Agentic Fit cao nhất, nên tách riêng thay vì nhồi chung vào #4 cho trace dễ đọc.
 >
