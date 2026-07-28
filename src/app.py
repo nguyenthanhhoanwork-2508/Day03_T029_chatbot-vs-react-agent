@@ -282,7 +282,7 @@ st.markdown(
             min-height: 52vh;
             flex: 1;
             margin: 0 auto;
-            padding: 2rem 0 7.5rem;
+            padding: 2rem 0 150px;
         }
 
         .ves-user-message {
@@ -346,18 +346,70 @@ st.markdown(
         }
 
         .st-key-chat_composer {
-            position: sticky;
-            z-index: 20;
+            position: fixed !important;
+            z-index: 1000;
+            right: unset;
             bottom: 16px;
-            width: min(100%, 920px);
-            margin: auto auto 1rem;
+            left: 50%;
+            width: min(920px, calc(100vw - 32px));
+            max-width: 920px;
+            margin: 0;
             padding: 0.625rem;
             border: 0;
             border-radius: 22px;
-            background: rgba(245, 249, 255, 0.92);
-            box-shadow: none;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(245, 249, 255, 0.94);
+            box-shadow: 0 14px 38px rgba(37, 99, 235, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transform: translateX(-50%);
+        }
+
+        .st-key-chat_composer [data-testid="stHorizontalBlock"] {
+            display: grid !important;
+            width: 100% !important;
+            grid-template-columns: minmax(0, 1fr) 40px !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+
+        .st-key-chat_composer [data-testid="stColumn"] {
+            width: 100% !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .st-key-clear_chat_icon,
+        .st-key-clear_chat_icon [data-testid="stButton"] {
+            width: 40px !important;
+            height: 40px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .st-key-clear_chat_icon button {
+            display: grid !important;
+            width: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            height: 40px !important;
+            min-height: 40px !important;
+            max-height: 40px !important;
+            place-items: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 1px solid #D8E6FF !important;
+            border-radius: 12px !important;
+            background: #FFFFFF !important;
+            color: #2563EB !important;
+            box-shadow: none !important;
+            font-size: 1rem !important;
+        }
+
+        .st-key-clear_chat_icon button:hover {
+            border-color: #BFD4FF !important;
+            background: #EEF5FF !important;
+            color: #1D4ED8 !important;
         }
 
         [data-testid="stAlert"] {
@@ -406,6 +458,11 @@ st.markdown(
 
             .ves-assistant-bubble {
                 max-width: calc(100% - 54px);
+            }
+
+            .st-key-chat_composer {
+                bottom: 10px;
+                width: calc(100vw - 20px);
             }
         }
     </style>
@@ -489,7 +546,7 @@ def render_empty_composer(service: ChatService) -> str | None:
         return st.chat_input(
             "Nhập điểm thi, sở thích hoặc câu hỏi của bạn...",
             max_chars=service.max_message_length,
-            key="empty_chat_input",
+            key="hero_chat_input",
         )
 
 
@@ -520,13 +577,27 @@ def render_history() -> None:
 
 
 def render_chat_composer(service: ChatService) -> str | None:
-    """Render sticky, container-width input below the active thread."""
+    """Render fixed input and a same-size clear action below the active thread."""
     with st.container(key="chat_composer"):
-        return st.chat_input(
-            "Nhập điểm thi, sở thích hoặc câu hỏi của bạn...",
-            max_chars=service.max_message_length,
-            key="active_chat_input",
+        input_column, clear_column = st.columns(
+            [1, 0.06],
+            gap="small",
+            vertical_alignment="center",
         )
+        with input_column:
+            prompt = st.chat_input(
+                "Nhập điểm thi, sở thích hoặc câu hỏi của bạn...",
+                max_chars=service.max_message_length,
+                key="fixed_chat_input",
+            )
+        with clear_column:
+            if st.button(
+                "🗑️",
+                key="clear_chat_icon",
+                help="Cuộc trò chuyện mới",
+            ):
+                clear_conversation()
+        return prompt
 
 
 def submit_message(service: ChatService, prompt: str) -> None:
